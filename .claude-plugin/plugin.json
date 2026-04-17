@@ -1,0 +1,19 @@
+{
+  "name": "prompt-optimizer",
+  "description": "Turns vague task requests into clear, actionable prompts with explicit requirements, edge cases, and success criteria — before handing off to an executing agent.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Cody Hergenroeder",
+    "email": "chergenroeder135@gmail.com"
+  },
+  "homepage": "https://github.com/codyhxyz/prompt-optimizer",
+  "repository": "https://github.com/codyhxyz/prompt-optimizer",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agent",
+    "prompt-engineering",
+    "prompt-optimization",
+    "meta"
+  ]
+}
