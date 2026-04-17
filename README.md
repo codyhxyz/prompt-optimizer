@@ -2,21 +2,27 @@
 
 > A Claude Code agent that turns vague requests into crystal-clear, actionable prompts before another agent tries to execute them.
 
-Most agent failures trace back to an under-specified prompt: "make the UI better", "fix the bug where things aren't saving", "the search is slow." `prompt-optimizer` sits one step *before* your implementation agent. It reads your request, pulls out the implicit requirements, flags the ambiguities, and hands the executing agent a prompt it can actually succeed on.
+Most agent failures trace back to an under-specified prompt: "make the UI better", "fix the bug where things aren't saving", "the search is slow." `prompt-optimizer` sits one step *before* your implementation agent. It reads the request, grounds its specifics against the codebase with read-only tools, surfaces the ambiguities, and hands the executing agent a prompt it can actually succeed on.
 
-It is a prompt-engineering specialist, not a coder — it never writes implementation, only the spec.
+It is a prompt-engineering specialist, not a coder — it writes the spec and never the implementation.
 
-## What it does
+See [`agents/prompt-optimizer.md`](agents/prompt-optimizer.md) for the full behavioral spec.
 
-- **Extracts intent** — separates what you asked for from what you actually want.
-- **Makes implicit requirements explicit** — turns "make it better" into testable success criteria.
-- **Surfaces failure modes** — calls out ways the request could be misread, with defaults to pick if you don't answer.
-- **Preserves your goal** — never adds scope or changes direction; just sharpens the ask.
+## Output contract
 
-Output is always the same shape:
-1. A short analysis of what's unclear.
-2. The optimized prompt, structured (sections / numbered lists).
-3. A confidence note if anything still needs you to decide.
+The agent always emits three delimited blocks, in this order:
+
+```
+<analysis>...</analysis>
+<optimized_prompt>...</optimized_prompt>
+<decisions_required>...</decisions_required>
+```
+
+The parent agent should forward **only** the contents of `<optimized_prompt>` to the executing agent. `<analysis>` explains what was unclear and what was verified; `<decisions_required>` lists ambiguities the user should resolve before execution, each with a suggested default.
+
+## Grounding
+
+The agent is granted `Read`, `Grep`, and `Glob` — strictly read-only. Before naming any file, function, module, class, endpoint, or schema field in the optimized prompt, it verifies the specific exists. When verification fails or is infeasible, the prompt describes the component abstractly and logs a verification request in `<decisions_required>`. This prevents the highest-leverage failure mode for a prompt optimizer: confidently-wrong specs that the executor then follows into fiction.
 
 ## When to invoke it
 
@@ -25,9 +31,11 @@ Output is always the same shape:
 - You're chaining agents and want one clean handoff instead of an ambiguous one.
 - You need to split a vague bug report into a diagnostic plan before anyone starts changing code.
 
-Claude Code will auto-trigger the agent from its frontmatter description whenever a request looks vague, or you can call it explicitly:
+Claude Code auto-triggers the agent from its frontmatter description when a request looks vague, or you can call it explicitly:
 
 > "Use the prompt-optimizer agent to clarify this request before we implement it."
+
+Skip it for direct questions, in-scope edits ("rename `foo` to `bar` in `user.ts`"), or conversational back-and-forth.
 
 ## Installation
 
@@ -50,31 +58,15 @@ Claude Code will auto-trigger the agent from its frontmatter description wheneve
 claude --plugin-dir /path/to/prompt-optimizer
 ```
 
-## Usage
-
-> "Add a feature to let users share their notes."
-
-> "The search is slow, make it faster."
-
-> "Fix the bug where things aren't saving."
-
-In each case, Claude Code invokes `prompt-optimizer` first. You get back a clarified prompt — with explicit requirements, decision points, and success criteria — ready to pass to whatever agent is actually going to do the work.
-
-## Examples
-
-> **Example 1 — vague feature request.** User prompt: *"Add a feature to let users share their notes."* `prompt-optimizer` returns a structured brief that names the sharing mechanism (share button → unique link), surfaces the open questions (should links expire? view-only vs. edit? do shared notes appear in the sharer's own graph?), calls out the technical pieces (schema change, API endpoint, UI component), lists edge cases (what happens to shares when the source note is deleted), and defines success criteria (one-click share, no-auth recipient flow, respects existing access model) — all before the implementation agent writes a line of code.
-
-> **Example 2 — vague performance complaint.** User prompt: *"The search is slow, make it faster."* `prompt-optimizer` turns it into a diagnostic-first plan: profile the current implementation, measure local vs. API latency, identify the actual bottleneck (is it the Trie traversal, the network call, or the merge?), list concrete optimization strategies with tradeoffs (memoization, debouncing, result caching, virtual scrolling), flag context the executing agent will need (lazy-loaded graph layers, dual search surfaces), and set measurable targets (<200ms local, <500ms combined). The executing agent now has a real plan, not a vibe.
-
-> **Example 3 — vague bug report.** User prompt: *"Fix the bug where things aren't saving."* `prompt-optimizer` breaks it into reproduction-and-scope questions (what's not saving, always or intermittently, which layer), a component checklist (sync queue, API, DB, offline retry, batching), diagnostic steps (console, network tab, server logs, persistence flag), common failure modes (expired auth, race conditions, realtime sync overwriting local), and fix-validation criteria (works across entity types, offline→online retry, no undo/redo regressions). The executing agent walks in with a real investigation plan.
+This agent pins `model: opus` so optimization quality stays consistent even when the parent session is running a smaller model.
 
 ## Why an agent, not a slash command?
 
-Agents live in their own context. The optimizer's system prompt only loads when it's actually invoked, and its output is what comes back to the parent conversation — not the full prompt body. That matters because prompt optimization is something you do repeatedly (every vague ask, every handoff), and inlining the full specialist prompt into the parent context each time eats tokens you want spent on the actual work.
+Agents live in their own context. The optimizer's system prompt only loads when it's actually invoked, and only its delimited output comes back to the parent conversation — not the full system prompt body. That matters because prompt optimization is something you do repeatedly (every vague ask, every handoff), and inlining a specialist system prompt into the parent context each time eats tokens you want spent on the actual work.
 
 ## Contributing
 
-Issues and PRs welcome. If the optimizer misses a failure mode you keep hitting, that's a bug — file it with the before/after prompt.
+Issues and PRs welcome. If the optimizer misses a failure mode you keep hitting — or worse, fabricates a codebase specific — that's a bug. File it with the before/after prompt and the grounding trace.
 
 ## License
 

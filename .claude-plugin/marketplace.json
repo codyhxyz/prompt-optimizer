@@ -11,7 +11,7 @@
     {
       "name": "prompt-optimizer",
       "description": "Turns vague task requests into clear, actionable prompts with explicit requirements, edge cases, and success criteria — before handing off to an executing agent.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./",
       "author": {
         "name": "Cody Hergenroeder",
