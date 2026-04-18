@@ -26,7 +26,7 @@ Full behavioral spec lives in [`agents/prompt-optimizer.md`](agents/prompt-optim
 One add, every plugin I ship:
 
 ```
-/plugin marketplace add codyhxyz/claude-plugins
+/plugin marketplace add codyhxyz/codyhxyz-plugins
 /plugin install prompt-optimizer@codyhxyz-plugins
 ```
 
