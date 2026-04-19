@@ -4,6 +4,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/github/package-json/v/codyhxyz/prompt-optimizer?filename=.claude-plugin%2Fplugin.json&label=version" alt="Version"></a>
   <a href="https://claude.com/product/claude-code"><img src="https://img.shields.io/badge/built_for-Claude%20Code-d97706" alt="Built for Claude Code"></a>
+  <a href="https://github.com/codyhxyz/codyhxyz-plugins"><img src="https://img.shields.io/badge/part_of-codyhxyz--plugins-ffd900?logo=github&logoColor=000" alt="Part of codyhxyz-plugins"></a>
 </p>
 
 <p align="center"><b>Vague ask in. Grounded spec out.</b></p>
@@ -29,6 +30,8 @@ One add, every plugin I ship:
 /plugin marketplace add codyhxyz/codyhxyz-plugins
 /plugin install prompt-optimizer@codyhxyz-plugins
 ```
+
+See the full [codyhxyz-plugins marketplace](https://github.com/codyhxyz/codyhxyz-plugins) for my other plugins.
 
 ### Option 2: straight from this repo
 
@@ -123,3 +126,7 @@ Issues and PRs welcome. If the optimizer misses a failure mode you keep hitting,
 ## License
 
 [MIT](LICENSE) © 2026 Cody Hergenroeder
+
+---
+
+<sub>Part of <a href="https://github.com/codyhxyz/codyhxyz-plugins"><b>codyhxyz-plugins</b></a> 🍋 — my registry of Claude Code plugins.</sub>
